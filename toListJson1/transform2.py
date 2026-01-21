@@ -8,13 +8,13 @@ def main():
     id = f"{uuid.uuid4()}.json"
     # 种植业 | 渔业（水产业） | 休闲农业与乡村旅游业 | 设施农业 | 农产品贸易业
     # 农业职业教育 | 农业科技服务业 | 农业文化 | 畜牧业 | 农产品加工业
-    path1 = r"D:\DATA\多语言语料文本采集\越南语\畜牧业"
+    path1 = r"D:\DATA\多语言语料文本采集\越南语\种植业"
     path2 = None
     path3=None
     path4=None
     path5=None
-    target_folder = r"D:\DATA\多语言语料文本采集\越南语\总-畜牧业"
-    output_path = r"D:\DATA\DATA\东盟十国特定领域文本采集\越南语\畜牧业"
+    target_folder = r"D:\DATA\多语言语料文本采集\越南语\总-种植业"
+    output_path = r"D:\DATA\DATA\东盟十国特定领域文本采集\越南语\种植业"
     merge_data = DictToArray()
     merge_data.merge_json_files_by_url(id, output_path,target_folder,path1,path2,path3,path4,path5)
 
