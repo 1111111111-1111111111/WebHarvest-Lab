@@ -4,7 +4,7 @@ import json
 import shutil
 
 
-def text__classificate(cf, path):
+def text_classificate(cf, path):
     """文本重新分类"""
     error_count = processed_count = 0
     for root, dirs, files in os.walk(path):
@@ -40,7 +40,7 @@ def main():
     """主程序"""
     path = r'D:\DATA\多语言语料文本采集\越南语'
     cf = AgricultureClassifier()
-    text__classificate(cf, path)
+    text_classificate(cf, path)
 
 
 if __name__ == '__main__':

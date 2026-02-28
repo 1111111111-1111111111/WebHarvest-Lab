@@ -25,12 +25,11 @@ class DatabaseOperations:
             self.conn = pymysql.connect(**self.config)
             self.cursor = self.conn.cursor()
             print("数据库连接成功")
-            return True
         except pymysql.MySQLError as e:
             print(f"数据库连接失败：{e}")
             self.conn = None
             self.cursor = None
-            return False
+
 
     def close(self):
         """断开数据库连接"""
@@ -95,5 +94,21 @@ class DatabaseOperations:
         except pymysql.MySQLError as e:
             print(f"删除重复数据失败: {e}")
             self.conn.rollback()
+
+
+    def delete_data(self,SQL,values):
+        """查询所有数据"""
+        if not self.conn or not self.cursor:
+            print("数据库未连接，请先调用connect()方法")
+            return False
+        try:
+            # 执行查询
+            self.cursor.execute(SQL,values)
+            # 获取所有结果
+            self.conn.commit()
+            return True
+        except pymysql.MySQLError as e:
+            print(f"查询URL失败: {e}")
+            return False
 
 

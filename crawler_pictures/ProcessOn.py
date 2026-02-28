@@ -401,7 +401,7 @@ async def main():
     max_retries = 3
     while True:
         all_urls = []
-        #
+
         # 已读取：热门\推荐\克隆最多\最新发布\达人
         dl = ProcessLog()
         log_path = r"D://pictures_log.log"
@@ -420,11 +420,12 @@ async def main():
         if len(no_num) == 0:
             break
 
-        for i in no_num: # 3554
+        # https://www.processon.com/template/all/pt
+        for i in no_num: # 5001
             if i == 1:
-                url = r"https://www.processon.com/template/flow/talent"
+                url = r"https://www.processon.com/template/flow/pt"
             else:
-                url = rf"https://www.processon.com/template/flow/talent_page{i}"
+                url = rf"https://www.processon.com/template/flow/pt_page{i}"
             all_urls.append(url)
 
         crawler = MultiLevelAsyncCrawler(
@@ -432,7 +433,7 @@ async def main():
             max_concurrent_level2=50,
             timeout=30,
             retry_times=3,
-            save_path=r'D:\DATA\DATA\Pictures\流程图'
+            save_path=r'D:\DATA\Pictures\流程图'
         )
 
         results = await crawler.run(all_urls)

@@ -213,6 +213,31 @@ class DealFile:
         print(f"【INFO】 所有文件读取完毕")
         return result_dict
 
+    def write_csv_(self, base_path, columns, data, mode,filename):
+        file_path = os.path.join(base_path, "seen.csv")
+
+        # 确保父目录存在
+        os.makedirs(base_path, exist_ok=True)
+
+        # 确保所有数据都包含这些字段
+        processed_data = []
+        for item in data:
+            # 创建一个包含所有字段的新字典
+            processed_item = {}
+            for filename in columns:
+                if filename =="content":
+
+                    processed_item[filename] = item.get(filename, '')
+                processed_item[filename] = item.get(filename, '')  # 如果字段不存在，使用空字符串
+
+            processed_data.append(processed_item)
+
+        with open(file_path, mode, newline='', encoding='utf-8-sig') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=columns)
+            # writer.writeheader()
+            writer.writerows(processed_data)
+
+        print(f"【INFO】 文件写入成功")
     def write_csv(self, base_path, columns, data,mode):
         file_path = os.path.join(base_path, "seen.csv")
 

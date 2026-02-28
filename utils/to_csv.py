@@ -3,6 +3,7 @@ import os
 import hashlib
 from utils.file_io import DealFile
 import pandas as pd
+import shutil
 dealfile = DealFile()
 
 
@@ -34,10 +35,11 @@ class TEXTToCSV(DealFile):
                         for con in parser:
                             if con['url'] in exist_urls:
                                 continue
+                            content = con['title'] + con["content"]
                             res = {
                                 "lan": con["language"],
                                 "labels": labels,
-                                "md5": hashlib.md5(con["content"].encode("utf-8")).hexdigest(),
+                                "md5": hashlib.md5(content.encode("utf-8")).hexdigest(),
                                 "url": con["url"],
                                 "file_type": file_type,
                                 "filename": con["id"]
@@ -46,7 +48,9 @@ class TEXTToCSV(DealFile):
                             data.append(res)
 
         df = pd.DataFrame(data)
+        df.drop_duplicates(subset=['md5'], keep='first', inplace=True)
         df.to_csv(csv_path, mode="a",encoding="utf-8-sig",header=False,index=False)
+        print(f"[INFO] {csv_path}文件保存成功 -> 共{len(df.values.tolist())}条数据")
 
     def json_to_csv(self, url, data, base_path):
         content_md5 = hashlib.md5(data["content"].encode("utf-8")).hexdigest()
@@ -79,7 +83,7 @@ class PictureToCSV(DealFile):
     def __init__(self):
         super().__init__()
 
-    def to_csv(self, path, csv_path):
+    def to_csv(self, path, csv_path,mode='a'):
         base_path = os.path.basename(path)
         seen = set()
         data = {
@@ -98,14 +102,92 @@ class PictureToCSV(DealFile):
                             continue
                         data['md5'].append(md5)
                         data['extension'].append(extension)
-                        data['type'].append("流程图")
+                        data['type'].append(os.path.basename(path))
             if os.path.exists(csv_path):
                 os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
-            pd.DataFrame(data).to_csv(csv_path,index=False, header=False, encoding="utf-8-sig")
-            print(f'图片数据保存成功')
+            pd.DataFrame(data).to_csv(csv_path,mode=mode,index=False, header=False, encoding="utf-8-sig")
+            print(f'[INFO] 图片数据保存成功')
         except Exception as e:
-            print(f'图片数据保存失败:{e}')
+            print(f'[False] 图片数据保存失败:{e}')
+
+import re
+class MurderToCSV(DealFile):
+    """csv文件去重"""
+    def __init__(self,path):
+        super().__init__()
+        self.path = path
+
+    def normalize_filename(self):
+        """初始化文件名"""
+        second_name = os.listdir(self.path)
+        for file in second_name:
+            folder_name = os.path.join(self.path,file)
+            if not os.path.isdir(folder_name):
+                continue
+            third_name = os.listdir(folder_name)
+            for name in third_name:
+                # 只保留汉字
+                match = re.search(r'[\u4e00-\u9fff]', name)
+                if match:
+                    # 返回从第一个汉字开始的子字符串
+                    new_name = name[match.start():]
+                else:
+                    new_name = name
+                patternr = "（.*"
+                new_name = re.sub(patternr, r"", new_name)
+                old_path = os.path.join(folder_name,name)
+                new_path = os.path.join(folder_name,new_name)
+                if os.path.exists(new_path):
+                    continue
+                os.rename(old_path,new_path)
+
+    def tocsv(self):
+        second_files = os.listdir(self.path)
+        count = 0
+        data = []
+        seen = set()
+        dup_data = []
+        output_path = os.path.join(self.path,"seen.csv")
+        dup_path = os.path.join(self.path,'dup_seen.csv')
+        for file in second_files:
+            second_path = os.path.join(self.path,file)
+            if not os.path.isdir(second_path):
+                continue
+
+            third_filename = os.listdir(second_path)
+            for filename in third_filename:
+                res = {
+                    '剧本类型':file,
+                    '剧本名': filename
+                }
+                if res['剧本名'] not in seen:
+                    seen.add(res['剧本名'])
+                    data.append(res)
+                else:
+                    dup_data.append(res)
+                    path = os.path.join(self.path,file,filename)
+                    move_path = os.path.join(self.path,"dup")
+                    os.makedirs(move_path, exist_ok=True)
+                    if not os.path.exists(path):
+                        shutil.move(path,move_path)
+                    else:
+                        shutil.rmtree(path)
+
+                if len(data) % 100 == 0:
+                    df = pd.DataFrame(data)
+                    df.to_csv(output_path, index=False, header=False, encoding="utf-8-sig",mode='a')
+                    data = []
+        if data:
+            df = pd.DataFrame(data)
+            df.to_csv(output_path, index=False, header=False, encoding="utf-8-sig", mode='a')
+        if dup_data:
+            dup_df = pd.DataFrame(dup_data)
+            dup_df.to_csv(dup_path, index=False, header=False, encoding="utf-8-sig")
+        print('[INFO] CSV文件保存成功')
+
+
+
 
 class ConfigCSV:
     def __init__(self):
@@ -128,9 +210,7 @@ class ConfigCSV:
                             count += 1
                 elif file.endswith(".pdf"):
                     count += 1
-                elif file.endswith(".jpg"):
-                    count += 1
-                elif file.endswith(".png"):
+                else:
                     count += 1
         print(count)
 

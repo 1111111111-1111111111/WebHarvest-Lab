@@ -5,8 +5,6 @@ from config.asean10Countries_keyword_library import ClassificationResult, Keywor
 
 
 class AgricultureClassifier:
-    """精准农业分类器（越南语）"""
-
     def __init__(self):
         # 权重配置
         self.weights = {
@@ -104,6 +102,7 @@ class AgricultureClassifier:
         domain_matches = {}
 
         for domain, keywords in self.keyword_library.items():
+            # 验证
             if domain == Domain.OTHER:
                 continue
 
@@ -174,26 +173,26 @@ class AgricultureClassifier:
             "all_matched": []
         }
 
-        # 1. 检查排除词（优先检查，如果命中排除词，直接返回负分）
-        for word in keywords.exclusion_words:
-            if self._exact_match(word, text):
-                score += self.weights['exclusion']
-                matches["exclusion_hits"].append(word)
+        # # 1. 检查排除词（优先检查，如果命中排除词，直接返回负分）
+        # for word in keywords.exclusion_words:
+        #     if self._exact_match(word, text):
+        #         score += self.weights['exclusion']
+        #         matches["exclusion_hits"].append(word)
 
-        # 2. 检查必需词（没有必需词匹配，直接返回0分）
-        has_required = False
-        for word in keywords.required_words:
-            if self._exact_match(word, text) and not self._is_false_positive(word, text, domain):
-                # 验证必需词的真实性
-                if self._validate_required_word(word, text, domain):
-                    score += self.weights['required']
-                    matches["required_words"].append(word)
-                    matches["all_matched"].append(word)
-                    has_required = True
-                    break
+        # # 2. 检查必需词（没有必需词匹配，直接返回0分）
+        # has_required = False
+        # for word in keywords.required_words:
+        #     if self._exact_match(word, text) and not self._is_false_positive(word, text, domain):
+        #         # 验证必需词的真实性
+        #         if self._validate_required_word(word, text, domain):
+        #             score += self.weights['required']
+        #             matches["required_words"].append(word)
+        #             matches["all_matched"].append(word)
+        #             has_required = True
+        #             break
 
-        if not has_required:
-            return 0.0, matches
+        # if not has_required:
+        #     return 0.0, matches
 
         # 3. 检查核心词
         for word in keywords.core_words:
@@ -404,58 +403,12 @@ def test_classifier():
 
     # 测试文本1：企业注册服务（应该分类为OTHER）
     test_text1 = """
-    Additional information
-Loại sản phẩm	
-Rau củ hỗn hợp đông lạnh
-
-Thành phần	
-Cà rốt, ngô, đậu hà lan, khoai tây.
-
-Khối lượng	
-400 gram, 800 gram.
-
-Cách dùng	
-Không cần rã đông, dùng chế biến các món ăn như ninh, hầm, súp, xào thịt bò…
-
-Bảo quản	
-Giữ ở nhiệt độ < – 18ºC
-
-Chứng nhận	
-– Hàng Việt Nam chất lượng cao do người tiêu dùng bình chọn
-– Chứng nhận ISO 22000 : 2018
-
-Cảnh báo ATTP	
-– Không dùng cho những người bị dị ứng với thành phần của rau củ hỗn hợp.
-– Không sử dụng rau củ hỗn hợp đông lạnh khi có dấu hiệu hư hỏng trong quá trình bảo quản.
-– Không tái đông sản phẩm.
-
-Brand	
-Đôi Đũa Vàng
+Chiến dịch mang tên Sophia của Liên minh châu Âu có mục tiêu ban đầu là ngăn chặn và bắt giữ các nhóm buôn người, đưa người tị nạn từLibya vượt Địa Trung Hải sang châu Âu. Từ năm 2015, các tàu quân sự châu Âu thay nhau tuần tra trên biển đã giúp giảm 80% lượng người tị nạn vượt biển vào châu Âu.Phó Chủ tịch Ủy ban châu Âu Federica Mogherini muốn mở rộng phạm vi hoạt động của chiến dịch này sang kiểm soát việc chuyên chở vũ khí và dầu mỏ của Libya.Libya đang phải chịu cấm vận của Liên Hợp Quốc, không được nhập khẩu vũ khí, không được xuất khẩu dầu mỏ ngoài mức cho phép của Liên Hợp Quốc.Theo bàFederica Mogherini, chiến sự bùng phát tạiLibya từ hai tuần trở lại đây có nguy cơ biến thành cuộc nội chiến dài lâu. Nếu vũ khí được tuồn thêm vàoLibya thì tình hình sẽ tồi tệ thêm.Phó Chủ tịch Ủy ban châu Âutuyên bố rằng, chỉ có cách đưa thêm tàu tuần tra tới Địa Trung hải thì lệnh cấm vận của Liên Hợp Quốc mới thực hiện được và hy vọng các nước sẽ điều thêm tàu quân sự tới đây trong vài tuần tới.Theo vtv.vnCopy linkLink bài gốcLấy linkhttps://vtv.vn/the-gioi/eu-keu-goi-trien-khai-tau-chien-tai-dia-trung-hai-20190417220048407.htmTheo vtv.vn
 """
 
-    # 测试文本2：渔业新闻（应该分类为FISHERY）
-    test_text2 = """
-Tại sao nên sử dụng rau hỗn hợp đông lạnh?
-Sử dụng rau hỗn hợp đông lạnh mang lại nhiều lợi ích. Được cấp đông ngay sau thu hoạch, giữ nguyên chất lượng và giá trị dinh dưỡng. Tiết kiệm thời gian và công sức, với giá cả phải chăng và thời hạn sử dụng lâu dài.
-
->>> Xem thêm: 2 cách bảo quản rau muống hiệu quả vừa tươi vừa giữ được chất dinh dưỡng
-
-Việc bổ sung rau củ hỗn hợp vào chế độ ăn uống là cách để cung cấp đầy đủ chất xơ, chất chống oxy hóa, khoáng chất và vitamin cho cơ thể. Hạn chế các bệnh mãn tính như tim, ung thư, tiểu đường type 2…
-
-Bảo quản rau củ hỗn hợp đông lạnh bằng cách nào?
-
-    """
-
-    # 测试文本3：种植业新闻（应该分类为PLANTING）
-    test_text3 = """
-    Nông dân đang thu hoạch lúa vụ đông xuân. Năng suất lúa năm nay tăng cao.
-    Cây cà phê cũng cho sản lượng tốt.
-    """
 
     tests = [
         ("企业注册服务", test_text1),
-        ("渔业新闻", test_text2),
-        ("种植业新闻", test_text3)
     ]
 
     for name, text in tests:

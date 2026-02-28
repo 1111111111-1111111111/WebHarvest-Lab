@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import mimetypes
 from bs4 import BeautifulSoup
 
+
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -18,7 +19,7 @@ HEADERS = {
 
 
 def pictures_crawler(urls):
-    folder_picture = r"D:\DATA\DATA\Pictures\流程图"
+    folder_picture = r"D:\DATA\Pictures\流程图"
     os.makedirs(folder_picture, exist_ok=True)
 
     srcs = get_src(urls)
@@ -88,7 +89,8 @@ def get_src(urls):
 
 
 def auto_read_growing_file(file_path, last_position=0, interval=8):
-    """每 interval 秒自动读取正在增长的文件内容
+    """
+    每 interval 秒自动读取正在增长的文件内容
     last_position 表示已读的行数（row count），首次运行为0。
     返回值为更新后的 last_position。
     """
